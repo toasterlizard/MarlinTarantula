@@ -28,18 +28,18 @@
 
 ***********************************************************************/
 
-#define PRINTER_NAME "TEVO Tarantula (EasyConfig)"  // Change this to whatever you wish, or leave it as it is.
+#define PRINTER_NAME "ToastBot"  // Change this to whatever you wish, or leave it as it is.
                                                     // NOTE: Whatever you put here will have " Ready..." appended to it.
 
 /**
  * Equipment options
  */
-//#define LARGE_BED
+#define LARGE_BED
 #define SDSUPPORT
 //#define CHANGE_Y_DIRECTION        // If your bed homes in the wrong direction (it should move front to back) enable this.
 //#define CHANGE_X_DIRECTION        // If your X carriage homes in the wrong direction (it should move right to left) enable this.
 //#define CHANGE_Z_DIRECTION        // If your Z homes in the wrong direction (it should move top to bottom) enable this.
-//#define HOTEND_E3DV6              // Genuine E3D v6 hotend.
+#define HOTEND_E3DV6              // Genuine E3D v6 hotend.
 //#define FULL_GRAPHIC_SMART        // Enable this if you have a RepRap Discount Full Graphic Smart Controller (The
                                     // stock controller is a RepRap Discount Smart Controller)
 //#define Z_DUAL_STEPPER_DRIVERS    // Enable this if you have dual Z stepper motors with the second stepper motor
@@ -57,7 +57,7 @@
 /**
  * Minimal Z height (in mm) before homing (G28) for Z clearance above the bed, clamps, ...
  */
-#define Z_HOMING_HEIGHT 5
+#define Z_HOMING_HEIGHT 10
 
 /**
  * Primary Extruder steps per mm (plugged in to E0 port on controller)
@@ -80,7 +80,7 @@
 //#define SN04          // Green sensor
 //#define INDUCTIVE_NO  // Normally open inductive sensor
 //#define INDUCTIVE_NC  // Normally closed inductive sensor
-//#define SERVO_PROBE   // Endstop switch on rotating arm. Set servo angles!
+#define SERVO_PROBE   // Endstop switch on rotating arm. Set servo angles!
 
 /**
  * Bed leveling type (see: https://github.com/JimBrown/MarlinTarantula/wiki/Bed-leveling-types-(EasyConfig))
@@ -88,9 +88,9 @@
  */
 //#define TRIPOINT
 //#define LINEAR
-//#define BILINEAR
+#define BILINEAR
 //#define UBL
-#define MANUAL
+//#define MANUAL
 
 /**
  * Z-Probe offset from nozzle (https://github.com/JimBrown/MarlinTarantula/wiki/How-to-determine-your-Z-Probe-offset)
@@ -98,8 +98,8 @@
  * If you have a dual nozzle the offsets are calculated from the primary nozzle (the one plugged in to E0)
  */
 #define SENSOR_LEFT        0
-#define SENSOR_RIGHT       0
-#define SENSOR_FRONT       0
+#define SENSOR_RIGHT       45
+#define SENSOR_FRONT       33
 #define SENSOR_BEHIND      0
 
 /**
@@ -116,8 +116,8 @@
 /**
  * Servo probe deploy and stow angles
  */
-#define SERVO_DEPLOY    70
-#define SERVO_STOW      0
+#define SERVO_DEPLOY    38
+#define SERVO_STOW      128
 
 /**
  * Enable this to turn on support for two extruders
@@ -146,18 +146,18 @@
 /**
  * TEVO Tarantula Custom PID Settings - Stock Hotend
  */
-#define  hot_Kp 9.84
-#define  hot_Ki 0.50
-#define  hot_Kd 48.17
+#define  hot_Kp 19.45
+#define  hot_Ki 1.16
+#define  hot_Kd 81.27
 // FIND YOUR OWN: "M303 E0 C8 S200" to run autotune on the hotend at 200 degreesC for 8 cycles.
 // More info here: http://reprap.org/wiki/PID_Tuning
 
 /**
  * TEVO Tarantula Custom PID Settings - Stock Heatbed
  */
-#define  bed_Kp 984.88
-#define  bed_Ki 193.91
-#define  bed_Kd 1250.55
+#define  bed_Kp 241.72
+#define  bed_Ki 24.39
+#define  bed_Kd 599.01
 // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 // More info here: http://reprap.org/wiki/PID_Tuning
 
@@ -300,7 +300,7 @@
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
 // build by the user have been successfully uploaded into firmware.
-#define STRING_CONFIG_H_AUTHOR "(Jim Brown, TEVO Tarantula config)" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "(Benjamin Arthaud, TEVO Tarantula config)" // Who made the changes.
 #define SHOW_BOOTSCREEN
 #define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION // will be shown during bootup in line 1
 #define STRING_SPLASH_LINE2 WEBSITE_URL         // will be shown during bootup in line 2
@@ -1122,7 +1122,7 @@
 // The size of the print bed
 #define X_BED_SIZE 200
 #if ENABLED(LARGE_BED)
-  #define Y_BED_SIZE 280
+  #define Y_BED_SIZE 240
 #else
   #define Y_BED_SIZE 200
 #endif
