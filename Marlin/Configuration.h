@@ -109,7 +109,7 @@
  * Number of grid points in each direction
  * Minimum 3. Maximum 15 for UBL. Maximum 7 for MANUAL
  */
-#define GRID_POINTS        3
+#define GRID_POINTS        7
 
 /**
  * Margin around perimiter of bed for probing (will not probe outside this margin)
