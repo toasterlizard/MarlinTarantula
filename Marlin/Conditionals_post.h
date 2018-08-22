@@ -69,6 +69,18 @@
 #define Y_MAX_BED (Y_CENTER + (Y_BED_SIZE) / 2)
 
 /**
+ * Dual X Carriage
+ */
+#if ENABLED(DUAL_X_CARRIAGE)
+  #ifndef X1_MIN_POS
+    #define X1_MIN_POS X_MIN_POS
+  #endif
+  #ifndef X1_MAX_POS
+    #define X1_MAX_POS X_BED_SIZE
+  #endif
+#endif
+
+/**
  * CoreXY, CoreXZ, and CoreYZ - and their reverse
  */
 #define CORE_IS_XY (ENABLED(COREXY) || ENABLED(COREYX))
@@ -401,6 +413,63 @@
 #define ARRAY_BY_HOTENDS1(v1) ARRAY_BY_HOTENDS(v1, v1, v1, v1, v1, v1)
 
 /**
+ * Driver Timings
+ * NOTE: Driver timing order is longest-to-shortest duration.
+ *       Preserve this ordering when adding new drivers.
+ */
+#ifndef MINIMUM_STEPPER_DIR_DELAY
+  #if HAS_DRIVER(TB6560)
+    #define MINIMUM_STEPPER_DIR_DELAY 15000
+  #elif HAS_DRIVER(TB6600)
+    #define MINIMUM_STEPPER_DIR_DELAY 1500
+  #elif HAS_DRIVER(DRV8825)
+    #define MINIMUM_STEPPER_DIR_DELAY 650
+  #elif HAS_DRIVER(LV8729)
+    #define MINIMUM_STEPPER_DIR_DELAY 500
+  #elif HAS_DRIVER(A4988)
+    #define MINIMUM_STEPPER_DIR_DELAY 200
+  #elif HAS_TRINAMIC || HAS_DRIVER(TMC2660) || HAS_DRIVER(TMC2130_STANDALONE) || HAS_DRIVER(TMC2208_STANDALONE) || HAS_DRIVER(TMC26X_STANDALONE) || HAS_DRIVER(TMC2660_STANDALONE)
+    #define MINIMUM_STEPPER_DIR_DELAY 20
+  #else
+    #define MINIMUM_STEPPER_DIR_DELAY 0   // Expect at least 10µS since one Stepper ISR must transpire
+  #endif
+#endif
+
+#ifndef MINIMUM_STEPPER_PULSE
+  #if HAS_DRIVER(TB6560)
+    #define MINIMUM_STEPPER_PULSE 30
+  #elif HAS_DRIVER(TB6600)
+    #define MINIMUM_STEPPER_PULSE 3
+  #elif HAS_DRIVER(DRV8825)
+    #define MINIMUM_STEPPER_PULSE 2
+  #elif HAS_DRIVER(A4988) || HAS_DRIVER(LV8729)
+    #define MINIMUM_STEPPER_PULSE 1
+  #elif HAS_TRINAMIC || HAS_DRIVER(TMC2660) || HAS_DRIVER(TMC2130_STANDALONE) || HAS_DRIVER(TMC2208_STANDALONE) || HAS_DRIVER(TMC26X_STANDALONE) || HAS_DRIVER(TMC2660_STANDALONE)
+    #define MINIMUM_STEPPER_PULSE 0
+  #else
+    #define MINIMUM_STEPPER_PULSE 2
+  #endif
+#endif
+
+#ifndef MAXIMUM_STEPPER_RATE
+  #if HAS_DRIVER(TB6560)
+    #define MAXIMUM_STEPPER_RATE 15000
+  #elif HAS_DRIVER(LV8729)
+    #define MAXIMUM_STEPPER_RATE 130000
+  #elif HAS_DRIVER(TB6600)
+    #define MAXIMUM_STEPPER_RATE 150000
+  #elif HAS_DRIVER(DRV8825)
+    #define MAXIMUM_STEPPER_RATE 250000
+  #elif HAS_TRINAMIC || HAS_DRIVER(TMC2660) || HAS_DRIVER(TMC2130_STANDALONE) || HAS_DRIVER(TMC2208_STANDALONE) || HAS_DRIVER(TMC26X_STANDALONE) || HAS_DRIVER(TMC2660_STANDALONE)
+    #define MAXIMUM_STEPPER_RATE 400000
+  #elif HAS_DRIVER(A4988)
+    #define MAXIMUM_STEPPER_RATE 500000
+  #else
+    #define MAXIMUM_STEPPER_RATE 250000
+  #endif
+#endif
+
+/**
  * X_DUAL_ENDSTOPS endstop reassignment
  */
 #if ENABLED(X_DUAL_ENDSTOPS)
@@ -607,24 +676,27 @@
 #define HAS_X2_ENABLE     (PIN_EXISTS(X2_ENABLE))
 #define HAS_X2_DIR        (PIN_EXISTS(X2_DIR))
 #define HAS_X2_STEP       (PIN_EXISTS(X2_STEP))
-#define HAS_Y_MICROSTEPS  (PIN_EXISTS(Y_MS1))
+#define HAS_X2_MICROSTEPS (PIN_EXISTS(X2_MS1))
 
 #define HAS_Y_ENABLE      (PIN_EXISTS(Y_ENABLE))
 #define HAS_Y_DIR         (PIN_EXISTS(Y_DIR))
 #define HAS_Y_STEP        (PIN_EXISTS(Y_STEP))
-#define HAS_Z_MICROSTEPS  (PIN_EXISTS(Z_MS1))
+#define HAS_Y_MICROSTEPS  (PIN_EXISTS(Y_MS1))
 
 #define HAS_Y2_ENABLE     (PIN_EXISTS(Y2_ENABLE))
 #define HAS_Y2_DIR        (PIN_EXISTS(Y2_DIR))
 #define HAS_Y2_STEP       (PIN_EXISTS(Y2_STEP))
+#define HAS_Y2_MICROSTEPS (PIN_EXISTS(Y2_MS1))
 
 #define HAS_Z_ENABLE      (PIN_EXISTS(Z_ENABLE))
 #define HAS_Z_DIR         (PIN_EXISTS(Z_DIR))
 #define HAS_Z_STEP        (PIN_EXISTS(Z_STEP))
+#define HAS_Z_MICROSTEPS  (PIN_EXISTS(Z_MS1))
 
 #define HAS_Z2_ENABLE     (PIN_EXISTS(Z2_ENABLE))
 #define HAS_Z2_DIR        (PIN_EXISTS(Z2_DIR))
 #define HAS_Z2_STEP       (PIN_EXISTS(Z2_STEP))
+#define HAS_Z2_MICROSTEPS (PIN_EXISTS(Z2_MS1))
 
 // Extruder steppers and solenoids
 #define HAS_E0_ENABLE     (PIN_EXISTS(E0_ENABLE))
@@ -658,27 +730,19 @@
 #define HAS_SOLENOID_4    (PIN_EXISTS(SOL4))
 
 // Trinamic Stepper Drivers
-#define HAS_TRINAMIC (ENABLED(HAVE_TMC2130) || ENABLED(HAVE_TMC2208) || ENABLED(IS_TRAMS))
-#define  X_IS_TRINAMIC (ENABLED( X_IS_TMC2130) || ENABLED( X_IS_TMC2208) || ENABLED(IS_TRAMS))
-#define X2_IS_TRINAMIC (ENABLED(X2_IS_TMC2130) || ENABLED(X2_IS_TMC2208))
-#define  Y_IS_TRINAMIC (ENABLED( Y_IS_TMC2130) || ENABLED( Y_IS_TMC2208) || ENABLED(IS_TRAMS))
-#define Y2_IS_TRINAMIC (ENABLED(Y2_IS_TMC2130) || ENABLED(Y2_IS_TMC2208))
-#define  Z_IS_TRINAMIC (ENABLED( Z_IS_TMC2130) || ENABLED( Z_IS_TMC2208) || ENABLED(IS_TRAMS))
-#define Z2_IS_TRINAMIC (ENABLED(Z2_IS_TMC2130) || ENABLED(Z2_IS_TMC2208))
-#define E0_IS_TRINAMIC (ENABLED(E0_IS_TMC2130) || ENABLED(E0_IS_TMC2208) || ENABLED(IS_TRAMS))
-#define E1_IS_TRINAMIC (ENABLED(E1_IS_TMC2130) || ENABLED(E1_IS_TMC2208))
-#define E2_IS_TRINAMIC (ENABLED(E2_IS_TMC2130) || ENABLED(E2_IS_TMC2208))
-#define E3_IS_TRINAMIC (ENABLED(E3_IS_TMC2130) || ENABLED(E3_IS_TMC2208))
-#define E4_IS_TRINAMIC (ENABLED(E4_IS_TMC2130) || ENABLED(E4_IS_TMC2208))
+#define HAS_STEALTHCHOP (HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2208))
+#define HAS_STALLGUARD  HAS_DRIVER(TMC2130)
+#define AXIS_HAS_STEALTHCHOP(ST) ( AXIS_DRIVER_TYPE(ST, TMC2130) || AXIS_DRIVER_TYPE(ST, TMC2208) )
+#define AXIS_HAS_STALLGUARD(ST) AXIS_DRIVER_TYPE(ST, TMC2130)
 
 #if ENABLED(SENSORLESS_HOMING)
   // Disable Z axis sensorless homing if a probe is used to home the Z axis
   #if HOMING_Z_WITH_PROBE
     #undef Z_HOMING_SENSITIVITY
   #endif
-  #define X_SENSORLESS (ENABLED(X_IS_TMC2130) && defined(X_HOMING_SENSITIVITY))
-  #define Y_SENSORLESS (ENABLED(Y_IS_TMC2130) && defined(Y_HOMING_SENSITIVITY))
-  #define Z_SENSORLESS (ENABLED(Z_IS_TMC2130) && defined(Z_HOMING_SENSITIVITY))
+  #define X_SENSORLESS (AXIS_HAS_STALLGUARD(X) && defined(X_HOMING_SENSITIVITY))
+  #define Y_SENSORLESS (AXIS_HAS_STALLGUARD(Y) && defined(Y_HOMING_SENSITIVITY))
+  #define Z_SENSORLESS (AXIS_HAS_STALLGUARD(Z) && defined(Z_HOMING_SENSITIVITY))
 #endif
 
 // Endstops and bed probe
@@ -975,6 +1039,7 @@
 #define PLANNER_LEVELING      (OLDSCHOOL_ABL || ENABLED(MESH_BED_LEVELING) || UBL_SEGMENTED || ENABLED(SKEW_CORRECTION))
 #define HAS_PROBING_PROCEDURE (HAS_ABL || ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST))
 #define HAS_UBL_AND_CURVES (ENABLED(AUTO_BED_LEVELING_UBL) && !PLANNER_LEVELING && (ENABLED(ARC_SUPPORT) || ENABLED(BEZIER_CURVE_SUPPORT)))
+#define HAS_FEEDRATE_SCALING (ENABLED(SCARA_FEEDRATE_SCALING) || ENABLED(DELTA_FEEDRATE_SCALING))
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)
   #undef LCD_BED_LEVELING
@@ -1229,13 +1294,19 @@
     #define Z_HOMING_HEIGHT Z_CLEARANCE_BETWEEN_PROBES
   #endif
 #endif
-#ifndef Z_CLEARANCE_BETWEEN_PROBES
-  #define Z_CLEARANCE_BETWEEN_PROBES Z_HOMING_HEIGHT
-#endif
-#if Z_CLEARANCE_BETWEEN_PROBES > Z_HOMING_HEIGHT
-  #define MANUAL_PROBE_HEIGHT Z_CLEARANCE_BETWEEN_PROBES
-#else
-  #define MANUAL_PROBE_HEIGHT Z_HOMING_HEIGHT
+
+#if PROBE_SELECTED
+  #ifndef Z_CLEARANCE_BETWEEN_PROBES
+    #define Z_CLEARANCE_BETWEEN_PROBES Z_HOMING_HEIGHT
+  #endif
+  #if Z_CLEARANCE_BETWEEN_PROBES > Z_HOMING_HEIGHT
+    #define MANUAL_PROBE_HEIGHT Z_CLEARANCE_BETWEEN_PROBES
+  #else
+    #define MANUAL_PROBE_HEIGHT Z_HOMING_HEIGHT
+  #endif
+  #ifndef Z_CLEARANCE_MULTI_PROBE
+    #define Z_CLEARANCE_MULTI_PROBE Z_CLEARANCE_BETWEEN_PROBES
+  #endif
 #endif
 
 // Updated G92 behavior shifts the workspace
@@ -1307,122 +1378,5 @@
 #if ENABLED(SDCARD_SORT_ALPHA)
   #define HAS_FOLDER_SORTING (FOLDER_SORTING || ENABLED(SDSORT_GCODE))
 #endif
-
-// Calculate a default maximum stepper rate, if not supplied
-#ifndef MAXIMUM_STEPPER_RATE
-  #if MINIMUM_STEPPER_PULSE
-    #define MAXIMUM_STEPPER_RATE (1000000UL / (2UL * (MINIMUM_STEPPER_PULSE)))
-  #else
-    #define MAXIMUM_STEPPER_RATE 500000UL
-  #endif
-#endif
-
-//
-// Estimate the amount of time the ISR will take to execute
-//
-
-// The base ISR takes 752 cycles
-#define ISR_BASE_CYCLES  752UL
-
-// Linear advance base time is 32 cycles
-#if ENABLED(LIN_ADVANCE)
-  #define ISR_LA_BASE_CYCLES 32UL
-#else
-  #define ISR_LA_BASE_CYCLES 0UL
-#endif
-
-// S curve interpolation adds 160 cycles
-#if ENABLED(S_CURVE_ACCELERATION)
-  #define ISR_S_CURVE_CYCLES 160UL
-#else
-  #define ISR_S_CURVE_CYCLES 0UL
-#endif
-
-// Stepper Loop base cycles
-#define ISR_LOOP_BASE_CYCLES 32UL
-
-// And each stepper takes 88 cycles
-#define ISR_STEPPER_CYCLES 88UL
-
-// For each stepper, we add its time
-#ifdef HAS_X_STEP
-  #define ISR_X_STEPPER_CYCLES ISR_STEPPER_CYCLES
-#else
-  #define ISR_X_STEPPER_CYCLES 0UL
-#endif
-
-// For each stepper, we add its time
-#ifdef HAS_Y_STEP
-  #define ISR_Y_STEPPER_CYCLES ISR_STEPPER_CYCLES
-#else
-  #define ISR_Y_STEPPER_CYCLES 0UL
-#endif
-
-// For each stepper, we add its time
-#ifdef HAS_Z_STEP
-  #define ISR_Z_STEPPER_CYCLES ISR_STEPPER_CYCLES
-#else
-  #define ISR_Z_STEPPER_CYCLES 0UL
-#endif
-
-// E is always interpolated, even for mixing extruders
-#define ISR_E_STEPPER_CYCLES ISR_STEPPER_CYCLES
-
-// If linear advance is disabled, then the loop also handles them
-#if DISABLED(LIN_ADVANCE) && ENABLED(MIXING_EXTRUDER)
-  #define ISR_MIXING_STEPPER_CYCLES ((MIXING_STEPPERS) * ISR_STEPPER_CYCLES)
-#else
-  #define ISR_MIXING_STEPPER_CYCLES  0UL
-#endif
-
-// And the total minimum loop time is, without including the base
-#define MIN_ISR_LOOP_CYCLES (ISR_X_STEPPER_CYCLES + ISR_Y_STEPPER_CYCLES + ISR_Z_STEPPER_CYCLES + ISR_E_STEPPER_CYCLES + ISR_MIXING_STEPPER_CYCLES)
-
-// Calculate the minimum MPU cycles needed per pulse to enforce not surpassing the maximum stepper rate
-#define _MIN_STEPPER_PULSE_CYCLES(N) MAX((F_CPU) / (MAXIMUM_STEPPER_RATE), ((F_CPU) / 500000UL) * (N))
-#if MINIMUM_STEPPER_PULSE
-  #define MIN_STEPPER_PULSE_CYCLES _MIN_STEPPER_PULSE_CYCLES(MINIMUM_STEPPER_PULSE)
-#else
-  #define MIN_STEPPER_PULSE_CYCLES _MIN_STEPPER_PULSE_CYCLES(1)
-#endif
-
-// But the user could be enforcing a minimum time, so the loop time is
-#define ISR_LOOP_CYCLES (ISR_LOOP_BASE_CYCLES + MAX(MIN_STEPPER_PULSE_CYCLES, MIN_ISR_LOOP_CYCLES))
-
-// If linear advance is enabled, then it is handled separately
-#if ENABLED(LIN_ADVANCE)
-
-  // Estimate the minimum LA loop time
-  #if ENABLED(MIXING_EXTRUDER)
-    #define MIN_ISR_LA_LOOP_CYCLES ((MIXING_STEPPERS) * (ISR_STEPPER_CYCLES))
-  #else
-    #define MIN_ISR_LA_LOOP_CYCLES ISR_STEPPER_CYCLES
-  #endif
-
-  // And the real loop time
-  #define ISR_LA_LOOP_CYCLES MAX(MIN_STEPPER_PULSE_CYCLES, MIN_ISR_LA_LOOP_CYCLES)
-
-#else
-  #define ISR_LA_LOOP_CYCLES 0UL
-#endif
-
-// Now estimate the total ISR execution time in cycles given a step per ISR multiplier
-#define ISR_EXECUTION_CYCLES(rate) (((ISR_BASE_CYCLES + ISR_S_CURVE_CYCLES + (ISR_LOOP_CYCLES * rate) + ISR_LA_BASE_CYCLES + ISR_LA_LOOP_CYCLES)) / rate)
-
-// The maximum allowable stepping frequency when doing x128-x1 stepping (in Hz)
-#define MAX_128X_STEP_ISR_FREQUENCY (F_CPU / ISR_EXECUTION_CYCLES(128))
-#define MAX_64X_STEP_ISR_FREQUENCY  (F_CPU / ISR_EXECUTION_CYCLES(64))
-#define MAX_32X_STEP_ISR_FREQUENCY  (F_CPU / ISR_EXECUTION_CYCLES(32))
-#define MAX_16X_STEP_ISR_FREQUENCY  (F_CPU / ISR_EXECUTION_CYCLES(16))
-#define MAX_8X_STEP_ISR_FREQUENCY   (F_CPU / ISR_EXECUTION_CYCLES(8))
-#define MAX_4X_STEP_ISR_FREQUENCY   (F_CPU / ISR_EXECUTION_CYCLES(4))
-#define MAX_2X_STEP_ISR_FREQUENCY   (F_CPU / ISR_EXECUTION_CYCLES(2))
-#define MAX_1X_STEP_ISR_FREQUENCY   (F_CPU / ISR_EXECUTION_CYCLES(1))
-
-// The minimum allowable frequency for step smoothing will be 1/10 of the maximum nominal frequency (in Hz)
-#define MIN_STEP_ISR_FREQUENCY    MAX_1X_STEP_ISR_FREQUENCY
-
-// Disable multiple steps per ISR
-//#define DISABLE_MULTI_STEPPING
 
 #endif // CONDITIONALS_POST_H
