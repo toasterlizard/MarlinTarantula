@@ -101,9 +101,9 @@
  * Use only one of Left/Right and Front/Behind. Others must be 0 (zero)
  * If you have a dual nozzle the offsets are calculated from the primary nozzle (the one plugged in to E0)
  */
-#define SENSOR_LEFT        0
-#define SENSOR_RIGHT       45
-#define SENSOR_FRONT       33
+#define SENSOR_LEFT        4
+#define SENSOR_RIGHT       0
+#define SENSOR_FRONT       51
 #define SENSOR_BEHIND      0
 
 /**
@@ -120,8 +120,8 @@
 /**
  * Servo probe deploy and stow angles
  */
-#define SERVO_DEPLOY    35
-#define SERVO_STOW      128
+#define SERVO_DEPLOY    41
+#define SERVO_STOW      135
 
 /**
  * Enable this to turn on support for two extruders
