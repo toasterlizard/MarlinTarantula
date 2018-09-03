@@ -120,7 +120,7 @@
 /**
  * Servo probe deploy and stow angles
  */
-#define SERVO_DEPLOY    41
+#define SERVO_DEPLOY    37
 #define SERVO_STOW      135
 
 /**
